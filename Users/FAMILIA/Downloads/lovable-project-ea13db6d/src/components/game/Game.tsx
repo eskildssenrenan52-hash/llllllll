@@ -29,18 +29,19 @@ import AbilityBar from './AbilityBar'
 import ClassSwitcher from './ClassSwitcher'
 import ComboHUD from './ComboHUD'
 import StatusEffectsHUD from './StatusEffectsHUD'
-import ShopPanel from './ShopPanel'
 import MiniMap from './MiniMap'
-import WorldMap from './WorldMap'
 import DevPanel from './DevPanel'
 import QuestPanel from './QuestPanel'
 import AchievementsPanel from './AchievementsPanel'
+import ReputationPanel from './ReputationPanel'
+import MasteryPanel from './MasteryPanel'
+import PetPanel from './PetPanel'
+import AchievementsPanel2 from './AchievementsPanel2'
 import BossBar from './BossBar'
 import PassiveTree from './PassiveTree'
 import CraftingPanel, { CRAFT_RECIPES, type CraftRecipe } from './CraftingPanel'
 import StatsPanel from './StatsPanel'
 import HelpPanel from './HelpPanel'
-import TopRightToolbar from './TopRightToolbar'
 import RucoyModalBar from './RucoyModalBar'
 import RucoyWorldModal from './RucoyWorldModal'
 
@@ -125,8 +126,6 @@ export default function Game() {
   })
 
   const [showInventory, setShowInventory] = useState(false)
-  const [showShop, setShowShop] = useState(false)
-  const [showWorldMap, setShowWorldMap] = useState(false)
   const [showRucoyWorld, setShowRucoyWorld] = useState(false)
   const [showDevPanel, setShowDevPanel] = useState(false)
   const [teleportMode, setTeleportMode] = useState(false)
@@ -136,6 +135,10 @@ export default function Game() {
   const [showCrafting, setShowCrafting] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showReputation, setShowReputation] = useState(false)
+  const [showMastery, setShowMastery] = useState(false)
+  const [showPets, setShowPets] = useState(false)
+  const [showAch2, setShowAch2] = useState(false)
   const keysRef = useRef<Set<string>>(new Set())
   const rafRef = useRef<number>(0)
   const stateRef = useRef(gameState)
@@ -232,11 +235,7 @@ export default function Game() {
       }
 
       if (e.code === 'KeyI' && !stateRef.current.editorOpen) {
-        setShowInventory((v) => { setShowShop(false); return !v })
-        e.preventDefault()
-      }
-      if (e.code === 'KeyB' && !stateRef.current.editorOpen) {
-        setShowShop((v) => { setShowInventory(false); return !v })
+        setShowInventory((v) => !v)
         e.preventDefault()
       }
       if (e.code === 'KeyM' && !stateRef.current.editorOpen) {
@@ -269,6 +268,23 @@ export default function Game() {
         setShowHelp((v) => !v)
         e.preventDefault()
       }
+      // New system panels - R for Reputation, O for Mastery (O like "dominio"), E for Pets
+      if (e.code === 'KeyR' && !e.ctrlKey && !stateRef.current.editorOpen) {
+        setShowReputation((v) => !v)
+        e.preventDefault()
+      }
+      if (e.code === 'KeyO' && !stateRef.current.editorOpen) {
+        setShowMastery((v) => !v)
+        e.preventDefault()
+      }
+      if (e.code === 'KeyE' && !stateRef.current.editorOpen) {
+        setShowPets((v) => !v)
+        e.preventDefault()
+      }
+      if (e.code === 'Key2' && !stateRef.current.editorOpen) {
+        setShowAch2((v) => !v)
+        e.preventDefault()
+      }
       // Ability hotkeys 1-4
       if (!stateRef.current.editorOpen && !stateRef.current.isPaused) {
         const slotMatch = /^Digit([1-4])$/.exec(e.code)
@@ -281,8 +297,6 @@ export default function Game() {
       }
       if (e.code === 'Escape') {
         setShowInventory(false)
-        setShowShop(false)
-        setShowWorldMap(false)
         setShowRucoyWorld(false)
         setShowQuestPanel(false)
         setShowAchPanel(false)
@@ -290,6 +304,10 @@ export default function Game() {
         setShowCrafting(false)
         setShowStats(false)
         setShowHelp(false)
+        setShowReputation(false)
+        setShowMastery(false)
+        setShowPets(false)
+        setShowAch2(false)
         setTeleportMode(false)
       }
       if (e.code === 'F9') {
@@ -630,19 +648,6 @@ export default function Game() {
       {!gameState.editorOpen && gameState.player && gameState.currentMap && gameState.screen === 'playing' && !isDead && (
         <MiniMap
           gameState={gameState}
-          onToggleWorldMap={() => setShowWorldMap((v) => !v)}
-        />
-      )}
-
-      {/* World Map */}
-      {showWorldMap && !gameState.editorOpen && gameState.player && (
-        <WorldMap
-          gameState={gameState}
-          onClose={() => setShowWorldMap(false)}
-          onChangeMap={(mapId) => {
-            setGameState((prev) => ({ ...changeMap(prev, mapId), screen: 'playing' as const }))
-            setShowWorldMap(false)
-          }}
         />
       )}
 
@@ -679,6 +684,26 @@ export default function Game() {
       {/* Help Panel */}
       {showHelp && (
         <HelpPanel onClose={() => setShowHelp(false)} />
+      )}
+
+      {/* Reputation Panel */}
+      {showReputation && !gameState.editorOpen && gameState.player && gameState.player.reputation && (
+        <ReputationPanel reputation={gameState.player.reputation} onClose={() => setShowReputation(false)} />
+      )}
+
+      {/* Mastery Panel */}
+      {showMastery && !gameState.editorOpen && gameState.player && gameState.player.masteries && (
+        <MasteryPanel masteries={gameState.player.masteries} onClose={() => setShowMastery(false)} />
+      )}
+
+      {/* Pet Panel */}
+      {showPets && !gameState.editorOpen && gameState.player && gameState.player.pets && (
+        <PetPanel pets={gameState.player.pets} onClose={() => setShowPets(false)} />
+      )}
+
+      {/* Achievements Panel v2 */}
+      {showAch2 && !gameState.editorOpen && gameState.player && gameState.player.achievements && (
+        <AchievementsPanel2 achievements={gameState.player.achievements} onClose={() => setShowAch2(false)} />
       )}
 
       {/* Stats Panel */}
